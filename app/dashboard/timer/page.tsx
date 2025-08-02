@@ -1,21 +1,35 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { supabase } from "@/lib/supabaseClient"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Play, Pause, RotateCcw, Settings, Clock, Coffee, Target, TrendingUp } from "lucide-react"
+import { Play, Pause, RotateCcw, Settings, Clock, Coffee, TrendingUp } from "lucide-react"
 
 export default function TimerPage() {
-  const [timeLeft, setTimeLeft] = useState(25 * 60) // 25 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(25 * 60)
   const [isActive, setIsActive] = useState(false)
   const [isBreak, setIsBreak] = useState(false)
   const [sessions, setSessions] = useState(0)
   const [totalTime, setTotalTime] = useState(0)
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const workDuration = 25 * 60 // 25 minutes
-  const breakDuration = 5 * 60 // 5 minutes
+  const workDuration = 25 * 60
+  const breakDuration = 5 * 60
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      } else {
+        console.error("No user logged in!");
+      }
+    };
+    fetchUser();
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | null = null
@@ -26,9 +40,9 @@ export default function TimerPage() {
         setTotalTime((prev) => prev + 1)
       }, 1000)
     } else if (timeLeft === 0) {
-      // Session completed
       if (!isBreak) {
         setSessions((prev) => prev + 1)
+        savePomodoroSession(workDuration / 60)
         setIsBreak(true)
         setTimeLeft(breakDuration)
       } else {
@@ -42,6 +56,30 @@ export default function TimerPage() {
       if (interval) clearInterval(interval)
     }
   }, [isActive, timeLeft, isBreak, workDuration, breakDuration])
+
+  const savePomodoroSession = async (durationMins: number) => {
+    if (!userId) {
+      console.error("User ID not available - cannot save session");
+      return;
+    }
+
+    const roundedDuration = Math.round(durationMins);
+    const { error } = await supabase
+      .from("pomodoro_sessions")
+      .insert([
+        {
+          user_id: userId,
+          session_type: "work",
+          duration: roundedDuration,
+          created_at: new Date().toISOString()
+        }
+      ])
+    if (error) {
+      console.error("Failed to log pomodoro session:", error)
+    } else {
+      console.log("Pomodoro session saved successfully! Check Supabase.");
+    }
+  }
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -58,13 +96,6 @@ export default function TimerPage() {
   const currentDuration = isBreak ? breakDuration : workDuration
   const progress = ((currentDuration - timeLeft) / currentDuration) * 100
 
-  const todayStats = {
-    sessionsCompleted: 8,
-    totalFocusTime: 180, // minutes
-    averageSession: 22.5, // minutes
-    streak: 5, // days
-  }
-
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -79,7 +110,6 @@ export default function TimerPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Timer Card */}
         <div className="lg:col-span-2">
           <Card className="text-center">
             <CardHeader>
@@ -137,35 +167,7 @@ export default function TimerPage() {
           </Card>
         </div>
 
-        {/* Stats Sidebar */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Target className="w-5 h-5" />
-                Today's Progress
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Sessions</span>
-                <span className="font-semibold">{todayStats.sessionsCompleted}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Focus Time</span>
-                <span className="font-semibold">{todayStats.totalFocusTime}m</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Avg Session</span>
-                <span className="font-semibold">{todayStats.averageSession}m</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600">Streak</span>
-                <span className="font-semibold">{todayStats.streak} days 🔥</span>
-              </div>
-            </CardContent>
-          </Card>
-
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -202,7 +204,7 @@ export default function TimerPage() {
                 <span className="text-sm">Long Break</span>
                 <span className="text-sm font-medium">15 min</span>
               </div>
-              <Button variant="outline" size="sm" className="w-full mt-3 bg-transparent">
+              <Button variant="outline" size="sm" className="w-full mt-3 bg-transparent" disabled>
                 Customize
               </Button>
             </CardContent>
