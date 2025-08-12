@@ -1,3 +1,5 @@
+// Updated TaskCard.tsx with safe date formatting
+
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
@@ -36,6 +38,12 @@ const priorityColors = {
   high:
     "bg-red-100 text-red-700 border-red-300 dark:bg-red-900/20 dark:text-red-400 dark:border-red-400/40"
 };
+
+function formatDateString(dateStr?: string | null) {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  return isNaN(d.getTime()) ? null : d.toLocaleDateString();
+}
 
 export function TaskCard({
   task,
@@ -109,10 +117,10 @@ export function TaskCard({
               {task.priority}
             </Badge>
 
-            {task.dueDate && (
+            {formatDateString(task.dueDate) && (
               <Badge variant="outline" className="text-xs text-muted-foreground">
                 <Calendar className="w-3 h-3 mr-1" />
-                {new Date(task.dueDate).toLocaleDateString()}
+                {formatDateString(task.dueDate)}
               </Badge>
             )}
           </div>

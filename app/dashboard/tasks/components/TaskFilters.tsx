@@ -56,9 +56,9 @@ export function TaskFilters({ filters, onFiltersChange, subjects }: TaskFiltersP
             <SelectValue placeholder="Status" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem key="all" value="all">All Status</SelectItem>
+            <SelectItem key="pending" value="pending">Pending</SelectItem>
+            <SelectItem key="completed" value="completed">Completed</SelectItem>
           </SelectContent>
         </Select>
         
@@ -72,10 +72,10 @@ export function TaskFilters({ filters, onFiltersChange, subjects }: TaskFiltersP
             <SelectValue placeholder="Priority" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Priorities</SelectItem>
-            <SelectItem value="low">🟢 Low</SelectItem>
-            <SelectItem value="medium">🟡 Medium</SelectItem>
-            <SelectItem value="high">🔴 High</SelectItem>
+            <SelectItem key="all" value="all">All Priorities</SelectItem>
+            <SelectItem key="low" value="low">🟢 Low</SelectItem>
+            <SelectItem key="medium" value="medium">🟡 Medium</SelectItem>
+            <SelectItem key="high" value="high">🔴 High</SelectItem>
           </SelectContent>
         </Select>
         
@@ -87,9 +87,9 @@ export function TaskFilters({ filters, onFiltersChange, subjects }: TaskFiltersP
             <SelectValue placeholder="Subject" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All Subjects</SelectItem>
-            {subjects.map((subject) => (
-              <SelectItem key={subject} value={subject}>
+            <SelectItem key="all" value="all">All Subjects</SelectItem>
+            {subjects.map((subject, index) => (  // Switched to index for guaranteed uniqueness
+              <SelectItem key={index} value={subject}>
                 {subject}
               </SelectItem>
             ))}

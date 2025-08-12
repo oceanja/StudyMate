@@ -14,10 +14,12 @@ export default function LandingPage() {
             <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-blue-400 rounded-lg flex items-center justify-center">
               <Brain className="w-5 h-5 text-white" />
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">
+            <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-pink-500 to-blue-500 bg-clip-text text-transparent">
               StudyMate
             </span>
           </div>
+
+          {/* Desktop nav */}
           <nav className="hidden md:flex items-center space-x-6">
             <Link href="#features" className="text-gray-600 hover:text-gray-900 transition-colors">
               Features
@@ -29,12 +31,14 @@ export default function LandingPage() {
               About
             </Link>
           </nav>
-          <div className="flex items-center space-x-3">
+
+          {/* Auth buttons */}
+          <div className="hidden sm:flex items-center space-x-3">
             <Link href="/login">
-              <Button variant="ghost">Sign In</Button>
+              <Button variant="ghost" size="sm">Sign In</Button>
             </Link>
             <Link href="/signup">
-              <Button className="bg-gradient-to-r from-pink-400 to-blue-400 hover:from-pink-500 hover:to-blue-500">
+              <Button size="sm" className="bg-gradient-to-r from-pink-400 to-blue-400 hover:from-pink-500 hover:to-blue-500">
                 Get Started
               </Button>
             </Link>
@@ -43,15 +47,17 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="py-20 px-4">
+      <section className="py-16 sm:py-20 px-4">
         <div className="container mx-auto text-center">
-          <Badge className="mb-4 bg-pink-100 text-pink-600 hover:bg-pink-100">✨ AI-Powered Study Assistant</Badge>
-          <h1 className="text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-pink-400 via-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <Badge className="mb-4 bg-pink-100 text-pink-600 hover:bg-pink-100 text-sm sm:text-base">
+            ✨ AI-Powered Study Assistant
+          </Badge>
+          <h1 className="text-3xl sm:text-5xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-pink-400 via-blue-400 to-purple-400 bg-clip-text text-transparent leading-tight">
             Master Your Studies with
-            <br />
+            <br className="hidden sm:block" />
             Smart AI Assistance
           </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
             Transform your learning experience with personalized study plans, AI-generated content, and powerful
             productivity tools designed for modern students.
           </p>
@@ -59,17 +65,14 @@ export default function LandingPage() {
             <Link href="/signup">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-pink-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 text-lg px-8"
+                className="bg-gradient-to-r from-pink-400 to-blue-400 hover:from-pink-500 hover:to-blue-500 text-base sm:text-lg px-6 sm:px-8"
               >
                 Start Learning Free
                 <ArrowRight className="ml-2 w-5 h-5" />
               </Button>
             </Link>
-            <Button size="lg" variant="outline" className="text-lg px-8 bg-transparent">
-              Watch Demo
-            </Button>
           </div>
-          <div className="mt-12 flex items-center justify-center space-x-8 text-sm text-gray-500">
+          <div className="mt-8 sm:mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 sm:space-x-8 text-sm text-gray-500">
             <div className="flex items-center">
               <Star className="w-4 h-4 text-yellow-400 mr-1" />
               <span>4.9/5 Rating</span>
@@ -87,16 +90,16 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="py-20 px-4 bg-white">
+      <section id="features" className="py-16 sm:py-20 px-4 bg-white">
         <div className="container mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold mb-4">Everything You Need to Excel</h2>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-4xl font-bold mb-4">Everything You Need to Excel</h2>
+            <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
               Comprehensive study tools powered by AI to help you learn faster and retain more.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
                 <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center mb-4">
@@ -123,18 +126,6 @@ export default function LandingPage() {
 
             <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
               <CardHeader>
-                <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center mb-4">
-                  <BookOpen className="w-6 h-6 text-yellow-500" />
-                </div>
-                <CardTitle>Resource Library</CardTitle>
-                <CardDescription>
-                  Organize and access all your study materials, notes, and AI-generated resources in one place.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
                 <div className="w-12 h-12 bg-rose-100 rounded-lg flex items-center justify-center mb-4">
                   <Clock className="w-6 h-6 text-rose-500" />
                 </div>
@@ -144,43 +135,19 @@ export default function LandingPage() {
                 </CardDescription>
               </CardHeader>
             </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                  <Target className="w-6 h-6 text-green-500" />
-                </div>
-                <CardTitle>Progress Tracking</CardTitle>
-                <CardDescription>
-                  Visual analytics and insights to monitor your learning progress and identify improvement areas.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="border-0 shadow-lg hover:shadow-xl transition-shadow">
-              <CardHeader>
-                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                  <Zap className="w-6 h-6 text-purple-500" />
-                </div>
-                <CardTitle>Quick Actions</CardTitle>
-                <CardDescription>
-                  Instant flashcard generation, quiz creation, and summary tools to accelerate your learning.
-                </CardDescription>
-              </CardHeader>
-            </Card>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 px-4 bg-gradient-to-r from-pink-400 to-blue-400">
+      <section className="py-16 sm:py-20 px-4 bg-gradient-to-r from-pink-400 to-blue-400">
         <div className="container mx-auto text-center">
-          <h2 className="text-4xl font-bold text-white mb-6">Ready to Transform Your Study Experience?</h2>
-          <p className="text-xl text-emerald-100 mb-8 max-w-2xl mx-auto">
+          <h2 className="text-2xl sm:text-4xl font-bold text-white mb-4 sm:mb-6">Ready to Transform Your Study Experience?</h2>
+          <p className="text-base sm:text-xl text-emerald-100 mb-6 sm:mb-8 max-w-2xl mx-auto">
             Join thousands of students who are already studying smarter, not harder.
           </p>
           <Link href="/signup">
-            <Button size="lg" className="bg-white text-pink-600 hover:bg-pink-50 text-lg px-8">
+            <Button size="lg" className="bg-white text-pink-600 hover:bg-pink-50 text-base sm:text-lg px-6 sm:px-8">
               Get Started for Free
               <ArrowRight className="ml-2 w-5 h-5" />
             </Button>
@@ -189,17 +156,15 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12 px-4">
-        <div className="container mx-auto">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-blue-400 rounded-lg flex items-center justify-center">
-                <Brain className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-xl font-bold">StudyMate</span>
+      <footer className="bg-gray-900 text-white py-8 sm:py-12 px-4">
+        <div className="container mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-gradient-to-r from-pink-400 to-blue-400 rounded-lg flex items-center justify-center">
+              <Brain className="w-5 h-5 text-white" />
             </div>
-            <p className="text-gray-400">© 2024 StudyMate. All rights reserved.</p>
+            <span className="text-lg sm:text-xl font-bold">StudyMate</span>
           </div>
+          <p className="text-gray-400 text-sm sm:text-base">© 2025 StudyMate. All rights reserved.</p>
         </div>
       </footer>
     </div>

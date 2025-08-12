@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,17 +10,19 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/lib/supabaseClient";
 import type { Task } from "./TaskCard";
 
-interface AddTaskDialogProps {
-  onAddTask: (task: Task) => void;
+interface EditTaskDialogProps {
+  task: Task;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdateTask: (updatedTask: Task) => void;
 }
 
-export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
-  const [open, setOpen] = useState(false);
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
-  const [subject, setSubject] = useState("");
-  const [dueDate, setDueDate] = useState("");
+export function EditTaskDialog({ task, open, onOpenChange, onUpdateTask }: EditTaskDialogProps) {
+  const [title, setTitle] = useState(task.title);
+  const [description, setDescription] = useState(task.description || "");
+  const [priority, setPriority] = useState<"low" | "medium" | "high">(task.priority);
+  const [subject, setSubject] = useState(task.category || ""); // Assuming category = subject
+  const [dueDate, setDueDate] = useState(task.dueDate || "");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -29,33 +31,39 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
 
     setLoading(true);
 
-    // Fetch current user for user_id
+    // Fetch current user for user_id filtering
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      console.error("No user logged in - cannot add task");
+      console.error("No user logged in - cannot update task");
       setLoading(false);
       return;  // You can add a toast or UI feedback here
     }
 
-    const { data, error } = await supabase.from("tasks").insert({
+    const updatedData = {
       title: title.trim(),
       description: description.trim() || null,
-      completed: false,
       priority,
       subject: subject.trim() || "General",
       due_date: dueDate || null,
-      user_id: user.id  // Key addition: Link to current user
-    }).select().single();
+    };
+
+    const { data, error } = await supabase
+      .from("tasks")
+      .update(updatedData)
+      .eq("id", task.id)
+      .eq("user_id", user.id)  // Key addition: Filter by user_id for safety
+      .select()
+      .single();
 
     setLoading(false);
 
     if (error) {
-      console.error("Error adding task:", error.message);
+      console.error("Error updating task:", error.message);
       return;
     }
 
     if (data) {
-      onAddTask({
+      onUpdateTask({
         id: data.id,
         title: data.title,
         description: data.description,
@@ -65,26 +73,17 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
         dueDate: data.due_date,
       });
 
-      setTitle("");
-      setDescription("");
-      setPriority("medium");
-      setSubject("");
-      setDueDate("");
-      setOpen(false);
+      onOpenChange(false);
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Add Task</Button>
-      </DialogTrigger>
-
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>+ Add New Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
           <p className="text-sm text-muted-foreground">
-            Create a new task to keep track of your assignments and deadlines.
+            Update your task details.
           </p>
         </DialogHeader>
 
@@ -146,11 +145,11 @@ export function AddTaskDialog({ onAddTask }: AddTaskDialogProps) {
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? "Adding..." : "Add Task"}
+              {loading ? "Updating..." : "Update Task"}
             </Button>
           </div>
         </form>

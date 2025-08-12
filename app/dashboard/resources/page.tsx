@@ -14,6 +14,7 @@ import {
 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import jsPDF from "jspdf"
+import { useToast } from "@/hooks/use-toast"  
 
 interface Resource {
   id: string
@@ -26,62 +27,109 @@ export default function Page() {
   const [resources, setResources] = useState<Resource[]>([])
   const [prompt, setPrompt] = useState("")
   const [loading, setLoading] = useState(false)
+  const [currentUser, setCurrentUser] = useState<any>(null)
+  const { toast } = useToast()  
 
   useEffect(() => {
-    const fetchResources = async () => {
+    const fetchUserAndResources = async () => {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        toast({ title: "Error", description: "Please log in to view resources.", variant: "destructive" })
+        return
+      }
+      setCurrentUser(user)
+
       const { data, error } = await supabase
         .from("ai_responses")
         .select("*")
+        .eq("user_id", user.id)  
         .order("created_at", { ascending: false })
 
-      if (error) console.error("Error fetching:", error)
-      else setResources(data)
+      if (error) {
+        console.error("Error fetching:", error)
+        toast({ title: "Error", description: "Failed to load resources.", variant: "destructive" })
+      } else {
+        setResources(data || [])
+      }
     }
 
-    fetchResources()
-  }, [])
+    fetchUserAndResources()
+
+    let subscription: any
+    if (currentUser) {
+      subscription = supabase
+        .channel("ai_responses-channel")
+        .on(
+          "postgres_changes",
+          { event: "INSERT", schema: "public", table: "ai_responses", filter: `user_id=eq.${currentUser.id}` },
+          (payload) => {
+            const newResource = payload.new as Resource
+            setResources((prev) => [newResource, ...prev])
+          }
+        )
+        .subscribe()
+    }
+
+    return () => {
+      if (subscription) supabase.removeChannel(subscription)
+    }
+  }, [currentUser])
 
   const handleGenerate = async () => {
-    if (!prompt.trim()) return alert("Please enter a topic first.")
-    setLoading(true)
-
-    try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ prompt }),
-      })
-
-      if (!response.ok) throw new Error("Failed to generate")
-
-      const data = await response.json()
-
-      const { data: saved, error: saveError } = await supabase
-        .from("ai_responses")
-        .insert([{ prompt: prompt, response: data.content }])
-        .select()
-
-      if (saveError) throw saveError
-
-      setResources((prev) => [...saved, ...prev])
-      setPrompt("")
-    } catch (err) {
-      alert("Something went wrong while generating.")
-      console.error(err)
-    } finally {
-      setLoading(false)
-    }
+  if (!prompt.trim()) {
+    toast({ title: "Error", description: "Please enter a topic first.", variant: "destructive" })
+    return
   }
+  if (!currentUser) {
+    toast({ title: "Error", description: "Please log in to generate.", variant: "destructive" })
+    return
+  }
+  setLoading(true)
+
+  try {
+    const response = await fetch("/api/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ prompt }),
+    })
+
+    if (!response.ok) throw new Error("Failed to generate")
+
+    const data = await response.json()
+
+
+    setResources(prev => [
+      {
+        id: crypto.randomUUID(),
+        prompt,
+        response: data.content,
+        created_at: new Date().toISOString(),
+      },
+      ...prev
+    ])
+
+    setPrompt("")
+    toast({ title: "Success", description: "Resource generated and saved!" })
+  } catch (err) {
+    console.error(err)
+    toast({ title: "Error", description: "Something went wrong while generating.", variant: "destructive" })
+  } finally {
+    setLoading(false)
+  }
+}
+
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from("ai_responses").delete().eq("id", id)
+    if (!currentUser) return
+
+    const { error } = await supabase.from("ai_responses").delete().eq("id", id).eq("user_id", currentUser.id)  // Key: Filter by user_id
+
     if (error) {
-      alert("Error deleting resource.")
+      toast({ title: "Error", description: "Failed to delete resource.", variant: "destructive" })
       console.error(error)
     } else {
       setResources((prev) => prev.filter((res) => res.id !== id))
+      toast({ title: "Success", description: "Resource deleted." })
     }
   }
 
@@ -100,10 +148,7 @@ export default function Page() {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold">Generated Resources</h1>
         <div className="space-x-2">
-          <Button variant="outline">
-            <Upload className="w-4 h-4 mr-2" />
-            Upload
-          </Button>
+          
           <Button
             onClick={handleGenerate}
             disabled={loading}
