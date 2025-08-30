@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { CheckCircle, Clock, AlertTriangle, Target } from "lucide-react";
 import type { Task } from "./TaskCard";
 import '../index.css';
-import '../app.css';
+import '../App.css';
 
 interface TaskStatsProps {
   tasks: Task[];
