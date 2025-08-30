@@ -5,7 +5,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import '../index.css';
-import '../app.css';
+import '../App.css';
 import { MoreHorizontal, Calendar, Flag } from "lucide-react";
 import {
   DropdownMenu,
